@@ -90,7 +90,7 @@ int main()
         printf("\nInput Matrix B:\n");
         Matrix_input(B, rowB, colB);
 
-        printf("A = \n");
+        printf("\nA = \n");
         Matrix_display(A, rowA, colA);
         printf("\nB = \n");
         Matrix_display(B, rowB, colB);

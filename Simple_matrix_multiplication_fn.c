@@ -1,87 +1,102 @@
 #include<stdio.h>
 #include<stdlib.h>
-void Matrix_constant_multiplication(float *m, int row, int col, int cnst)
+void Matrix_constant_multiplication(float **m, int row, int col, int cnst)
 {
+    // M = c*M
     for(int i=0; i<row; i++)
         for(int j=0; j<col; j++)
-            *(m+(col*i)+j)*=cnst;
+            m[i][j]*=cnst;
 }
 
-void Matrix_display(float *m, int row, int col)
+void Matrix_display(float **m, int row, int col)
 {
     for(int i=0; i<row; i++)
     {
         for(int j=0; j<col; j++)
-            printf("%10.2f", *(m+(i*col)+j));
+            printf("%10.2f", m[i][j]);
         printf("\n");
     }
 }
 
-void Matrix_multiplication(float *A, float *B, float *C, int rowC, int colC, int colA) // colA or rowB (Middle dimension)
+void Matrix_multiplication(float **A, float **B, float **C, int rowC, int colC, int colA) // colA or rowB (Middle dimension)
 {
-    // Using pointer to access 2D-Array 
-    // C[2][1] = *(C+(2*colC)+1);
-        for(int i=0; i<rowC ; i++)
-            for(int j=0 ; j<colC ; j++)
-            {
-                *(C+(i*colC)+j)=0;
-                for(int k=0; k<colA ; k++)
-                    // C[i][j]+=A[i][k]*B[k][j];
-                    *(C+(i*colC)+j)+=(*(A+(i*colA)+k))*(*(B+(k*colC)+j)); // rowC == rowA, colC == colB, colA == rowB
-            }
+    // C = AxB
+    for(int i=0; i<rowC ; i++)
+        for(int j=0 ; j<colC ; j++)
+        {
+            C[i][j]=0;
+            for(int k=0; k<colA ; k++)
+                C[i][j]+=A[i][k]*B[k][j];
+        }
+}
+
+float** Matrix_create(int row, int col)
+{   
+    // Create zeros matrix
+    float **m = (float**)malloc(row*sizeof(float*));
+    if (m != NULL)
+    {
+        for(int i=0; i<row; i++)
+        {
+            m[i] = (float*)malloc(col*sizeof(float));
+            if (m[i] == NULL)
+                break;
+            else
+                for(int j=0; j<col; j++)
+                    m[i][j] = 0;
+        }
+        return m;
+    }
+    return NULL;
+}
+
+void Matrix_input(float **m, int row, int col)
+{
+    // Manually input data for each element of matrix
+    for(int i=0; i<row ; i++)
+        for(int j=0 ; j<col ; j++)
+        {
+            printf("[%d][%d]: ", i, j);
+            scanf("%f", &m[i][j]);
+        }
 }
 
 int main()
 {
-    int rowA, colA, rowB, colB, rowC, colC, i, j, k;
-    printf("Input number of row of Matrix A: ");
-    scanf("%d",&rowA);
-    printf("Input number of column of Matrix A: ");
-    scanf("%d",&colA);
+        int rowA, colA, rowB, colB, rowC, colC, i, j, k;
+        printf("Input number of row of Matrix A: ");
+        scanf("%d",&rowA);
+        printf("Input number of column of Matrix A: ");
+        scanf("%d",&colA);
 
-    printf("\nInput number of row of Matrix B: ");
-    scanf("%d",&rowB);
-    printf("Input number of column of Matrix B: ");
-    scanf("%d",&colB);
+        printf("\nInput number of row of Matrix B: ");
+        scanf("%d",&rowB);
+        printf("Input number of column of Matrix B: ");
+        scanf("%d",&colB);
 
-    if (colA != rowB)
-    {
-        printf("Number of column of Matrix A and Number of row of Matrix B is not equal");
-        exit(0);
-    }
-
-    rowC = rowA;
-    colC = colB;
-    printf("\nA(%d, %d), B(%d, %d), C(%d, %d)\n\n", rowA, colA, rowB, colB, rowC, colC);
-
-    float A[rowA][colA], B[rowB][colB], C[rowC][colC];
-    // Input matrix A
-    for(i=0; i<rowA ; i++)
-        for(j=0 ; j<colA ; j++)
+        if (colA != rowB)
         {
-            printf("A[%d][%d]: ", i, j);
-            scanf("%f", &A[i][j]);
+            printf("Number of column of Matrix A and Number of row of Matrix B is not equal");
+            exit(0);
         }
-    printf("\n");
 
-    // Input matrix B
-    for(i=0; i<rowB ; i++)
-        for(j=0 ; j<colB ; j++)
-        {
-            printf("B[%d][%d]: ", i, j);
-            scanf("%f", &B[i][j]);
-        }
-    
-    printf("\n");
-    
-    // C=AxB 
-    Matrix_multiplication(&A[0][0], &B[0][0], &C[0][0], rowC, colC, colA);
-    printf("Matrix C:\n");
-    for(i=0; i<10*colC ; i++)
-        printf("-");
-    printf("\n");
+        rowC = rowA;
+        colC = colB;
+        printf("\nA(%d, %d), B(%d, %d), C(%d, %d)\n\n", rowA, colA, rowB, colB, rowC, colC);
 
-    // Display C
-    Matrix_display(&C[0][0], rowC, colC);
-    return 0;
+        float **A=Matrix_create(rowA, colA), **B=Matrix_create(rowB, colB), **C=Matrix_create(rowC, colC);
+        printf("Input Matrix A:\n");
+        Matrix_input(A, rowA, colA);
+        printf("\nInput Matrix B:\n");
+        Matrix_input(B, rowB, colB);
+
+        printf("A = \n");
+        Matrix_display(A, rowA, colA);
+        printf("\nB = \n");
+        Matrix_display(B, rowB, colB);
+
+        // C=AxB
+        Matrix_multiplication(A, B, C, rowC, colC, colA);
+        printf("\nAxB = \n");
+        Matrix_display(C, rowC, colC);
 }

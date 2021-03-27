@@ -24,7 +24,17 @@ void Matrix_multiplication(float **A, float **B, float **C, int rowC, int colC, 
         }
 }
 
-float** Matrix_create(int row, int col)
+void Matrix_summation(float **A, float **B, float**C, int row, int col)
+{
+    // C = A+B
+    for(int i=0; i<row ; i++)
+        for(int j=0 ; j<col ; j++)
+        {
+            C[i][j]=A[i][j]+B[i][j];
+        }
+}
+
+float** Matrix_create(int row, int col, int is_random)
 {   
     // Create zeros matrix
     float **m = (float**)malloc(row*sizeof(float*));
@@ -37,7 +47,13 @@ float** Matrix_create(int row, int col)
                 break;
             else
                 for(int j=0; j<col; j++)
-                    m[i][j] = 0;
+                {
+                    if (is_random)
+                        m[i][j] = 2*(float)rand()/(float)(RAND_MAX)-1; // [-1, 1]
+                    else
+                        m[i][j] = 0;
+                }
+                    
         }
         return m;
     }
@@ -79,10 +95,10 @@ float** load_data(char *file_name)
     int *row_col = get_csv_row_col(file_name), row, col, i, j;
     row = row_col[0];
     col = row_col[1];
-    printf("%d, %d\n", row, col);
+    printf("%s\t(row:%d, col:%2d)\n", file_name,row, col);
     free(row_col);    
 
-    float **m = Matrix_create(row, col);
+    float **m = Matrix_create(row, col, 0);
     FILE *the_file = fopen(file_name, "r");
     if (the_file == NULL)
     {    
@@ -118,6 +134,20 @@ int main()
     colX = row_col[1];
     colY = 1;
     free(row_col);
-    Matrix_display(X, rowX, colX);
+
+    // Initialize weight
+    int rowW = colX;
+    int colW = rowY;
+    float **W = Matrix_create(rowW, colW, 1);
+
+    // Initialize bias
+    int rowB = rowY;
+    int colB = colY;
+    float **B = Matrix_create(rowB, colB, 1);
+
+    // Forward pass
+    float **Y_hat = Matrix_create(rowY, colY, 0);
+    Matrix_multiplication(X, W, Y_hat, rowY, colY, colX);
+    Matrix_display(Y_hat, rowY, colY);
     return 1;
 }

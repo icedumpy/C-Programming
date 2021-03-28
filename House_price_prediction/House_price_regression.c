@@ -180,6 +180,7 @@ void Normalize(float **m, int row, int col)
 
 int main()
 {
+    int total_iteration = 200000;
     float learning_rate = 0.1;
 
     // Load data into 2D-array
@@ -211,9 +212,10 @@ int main()
     float **Y_hat_sub_Y = Matrix_create(rowY, colY, 0);
     float **dL_dW = Matrix_create(rowW, colW, 0);
     float **dL_dB = Matrix_create(rowB, colB, 0);
+    float **X_T = Matrix_transpose(X, rowX, colX); // X transpose
     float loss;
 
-    for(int iteration=0; iteration<100000; iteration++)
+    for(int iteration=0; iteration<total_iteration; iteration++)
     {
         // Forward propagation
         Matrix_multiplication(X, W, Y_hat, rowY, colY, colX);
@@ -222,7 +224,6 @@ int main()
         // Backward propagation
         // dL_dW
         Matrix_subtraction(Y_hat, Y, Y_hat_sub_Y, rowY, colY); // (Y'-Y) # ' is hat
-        float **X_T = Matrix_transpose(X, rowX, colX); // X transpose
         Matrix_multiplication(X_T, Y_hat_sub_Y, dL_dW, rowW, colW, rowY); // X x (Y'-Y)
         Matrix_constant_multiplication(dL_dW, rowW, colW, learning_rate*2.0/rowX);
         // Update W
@@ -241,14 +242,8 @@ int main()
             for(int n=0; n<rowY; n++)
                 loss+=(Y_hat_sub_Y[n][0]*Y_hat_sub_Y[n][0]);
             loss/=rowX;
-            printf("Iteration(%05d), Loss: %f\n", iteration, loss);
+            printf("Iteration(%05.2f%%), Loss: %15.2f\n", 100*(float)iteration/total_iteration, loss);
         }
-        // Free transposed matrix
-        for(int n=0; n<colX; n++)
-        {
-            free(X_T[n]);
-        }
-        free(X_T);
     }
 
     Matrix_multiplication(X, W, Y_hat, rowY, colY, colX);
